@@ -1,0 +1,3 @@
+Clasificador ingenuo de Bayes
+
+Mostrará una sugerencia de bebida dependiendo de la temperatura del día y la edad del cliente.
