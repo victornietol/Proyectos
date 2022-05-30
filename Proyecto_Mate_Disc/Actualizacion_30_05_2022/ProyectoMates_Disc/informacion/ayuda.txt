@@ -1,0 +1,11 @@
+El chatbot puede mostrar sugerencias de contenido en plataformas como Netflix, HBO Max, Disney+, Spotify y YouTube.
+
+En Netflix y HBO Max puede mostrar películas, series y documentales. Las sugerencias de películas se muestran en cinco categorías diferentes: Acción, Comedia, Terror, Deporte y Animación.
+
+En Disney+ puede mostrar sugerencias de películas y series solamente. Las sugerencias de películas se encuentran divididas en cuatro categorías: Pixar, Marvel, Star Wars y Disney.
+
+En Spotify las sugerencias se encuentran divididas en canciones y podcasts. Asimismo, las canciones se dividen en las categorias: Top 10 global, Top 10 México, Entrenamiento, Pop, Urbano, Romance, Cumbia, Salsa, Rock, Hip Hop, Electronica, Jazz y Clásica.
+
+En YouTube se muestran recomendaciones de canales y se encuentran categorizadas en Mascotas, Videojuegos, Cocina, Niños, Tecnología y Autos.
+
+Además, se puede consultar la hora actual, el día actual, una básica descripción del estado del clima, y si se requiere puede mostrar una pequeña sinopsis de alguna película o serie que se haya mencionado en alguna recomendación. Por último, también puede mostrar algunos datos curiosos.
