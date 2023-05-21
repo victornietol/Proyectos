@@ -1,0 +1,193 @@
+# Importando los módulos para usar LEX y YACC
+import ply.lex as lex
+import ply.yacc as yacc
+
+# Abriendo el archivo de texto
+f = open("./entrada2.txt", "r")
+input = f.read()
+
+# Guardando cada instrucción por separado
+instrucciones = []
+with open("./entrada2.txt") as texto:
+    for linea in texto:
+        instrucciones.append(linea)
+
+# Definición de tokens
+tokens  = ('OPERACIONES','PARENT_IZQ','PARENT_DER','COR_IZQ','COR_DER','MAS','MENOS','POR',
+            'DIVIDIDO','DECIMAL','ENTERO','PUNT_COMA','MEZCLA','ROJO','AMARILLO',
+            'AZUL','CONVERSION','CONEXION','CELSIUS','FAHRENHEIT','KELVIN')
+
+# Valor de los tokens
+t_OPERACIONES  = r'Operacion'
+t_PARENT_IZQ = r'\('
+t_PARENT_DER = r'\)'
+t_COR_IZQ = r'\['
+t_COR_DER = r'\]'
+t_MAS = r'\+'
+t_MENOS = r'-'
+t_POR = r'\*'
+t_DIVIDIDO = r'/'
+t_PUNT_COMA = r';'
+t_MEZCLA = r'Mezcla'
+t_CONVERSION = r'Conversion|Conversión'
+t_CONEXION = r'[aA]'
+
+# Caracteres ignorados
+t_ignore = " \t|Â"
+
+# Tokens que regresan un valor
+def t_DECIMAL(t):
+    r'\d+\.\d+'
+    try:
+        t.value = float(t.value)
+    except ValueError:
+        print("Valor decimal demasiado grande %d", t.value)
+        t.value = 0
+    return t
+
+def t_ENTERO(t):
+    r'\d+'
+    try:
+        t.value = int(t.value)
+    except ValueError:
+        print("Valor entero demasiado grande %d", t.value)
+        t.value = 0
+    return t
+
+def t_ROJO(t):
+    r'rojo|ROJO|Rojo'
+    t.value = 'ROJO'
+    return t
+    
+def t_AMARILLO(t):
+    r'amarillo|AMARILLO|Amarillo'
+    t.value = 'AMARILLO'
+    return t
+
+def t_AZUL(t):
+    r'azul|AZUL|Azul'
+    t.value = 'AZUL'
+    return t
+
+def t_CELSIUS(t):
+    r'Celsius|CELSIUS|°C|celsius'
+    t.value = 'C'
+    return t
+
+def t_FAHRENHEIT(t):
+    r'Fahrenheit|FAHRENHEIT|°F|fahrenheit'
+    t.value = 'F'
+    return t
+
+def t_KELVIN(t):
+    r'Kelvin|KELVIN|°K|kelvin'
+    t.value = 'K'
+    return t
+
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += t.value.count("\n")
+    
+def t_error(t):
+    print("Caracter ilegal '%s'" % t.value[0])
+    t.lexer.skip(1)
+
+
+# Construyendo el analizador léxico
+lexer = lex.lex()
+
+# Declarando reglas de precedencia
+precedence = (('left','MAS','MENOS'),('left','POR','DIVIDIDO'),
+                ('right','UMENOS'))
+
+# Definición de la gramática para los casos de operaciones, mezcla de colores y conversiones
+def p_instrucciones_lista(t):
+    '''instrucciones    : instruccion instrucciones
+                        | instruccion '''
+
+def p_instrucciones_tipo(t):
+    '''instruccion : OPERACIONES COR_IZQ expresion_num COR_DER PUNT_COMA
+                    | MEZCLA COR_IZQ expresion_color COR_DER PUNT_COMA
+                    | CONVERSION COR_IZQ expresion_conver COR_DER PUNT_COMA'''
+    print('   El resultado es: ' + str(t[3]), end='\n\n')
+
+def p_expresion_binaria(t):
+    '''expresion_num : expresion_num MAS expresion_num
+                  | expresion_num MENOS expresion_num
+                  | expresion_num POR expresion_num
+                  | expresion_num DIVIDIDO expresion_num'''   
+    if( t[2] == '+' ): 
+        t[0] = t[1] + t[3]
+    elif(t[2] == '-'): 
+        t[0] = t[1] - t[3]
+    elif(t[2] == '*'): 
+        t[0] = t[1] * t[3]
+    elif(t[2] == '/'): 
+        t[0] = t[1] / t[3]
+
+def p_expresion_unaria(t):
+    'expresion_num : MENOS expresion_num %prec UMENOS'
+    t[0] = -t[2]
+
+def p_expresion_agrupacion(t):
+    'expresion_num : PARENT_IZQ expresion_num PARENT_DER'
+    t[0] = t[2]
+
+def p_expresion_number(t):
+    '''expresion_num    : ENTERO
+                    | DECIMAL'''
+    t[0] = t[1]
+    
+def p_expresion_colores(t):
+    'expresion_color : valor_color MAS valor_color'
+    if((t[1] == 'ROJO' and t[3] == 'AMARILLO') or (t[1] == 'AMARILLO' and t[3] == 'ROJO')):
+        t[0] = 'Naranja'
+    elif((t[1] == 'AMARILLO' and t[3] == 'AZUL') or (t[1] == 'AZUL' and t[3] == 'AMARILLO')):
+        t[0] = 'Verde'
+    elif((t[1] == 'AZUL' and t[3] == 'ROJO') or (t[1] == 'ROJO' and t[3] == 'AZUL')):
+        t[0] = 'Violeta'
+    elif(
+         (t[1] == 'ROJO' and t[3] == 'ROJO') or
+         (t[1] == 'AMARILLO' and t[3] == 'AMARILLO') or
+         (t[1] == 'AZUL' and t[3] == 'AZUL')
+         ):
+        t[0] = t[1]
+    
+def p_valor_color(t):
+    '''valor_color :  ROJO
+                    | AMARILLO
+                    | AZUL'''
+    t[0] = t[1]
+    
+def p_expresion_conversiones(t):
+    'expresion_conver : escala PARENT_IZQ expresion_num PARENT_DER CONEXION escala'
+    if(t[1] == 'C' and t[6] == 'F'):   # Celsius a Fahrenheit
+        t[0] = (float(t[3])*1.8) + 32.0
+    elif(t[1] == 'F' and t[6] == 'C'):   # Faherenheit a Celsius
+        t[0] = (float(t[3])-32.0) / 1.8
+    elif(t[1] == 'C' and t[6] == 'K'):   # Celsius a Kelvin
+        t[0] = float(t[3]) + 273.15
+    elif(t[1] == 'K' and t[6] == 'C'):   # Kelvin a Celsius
+        t[0] = float(t[3]) - 273.15
+    elif(t[1] == 'F' and t[6] == 'K'):   # Fahrenheit a Kelvin
+        t[0] = ((float(t[3])-32.0) / 1.8) + 273.15
+    elif(t[1] == 'K' and t[6] == 'F'):   # Kelvin a Fahrenheit 
+        t[0] = ((float(t[3]) - 273.15)*1.8) + 32.0
+    
+def p_tipo_escala(t):
+    '''escala : CELSIUS
+              | FAHRENHEIT
+              | KELVIN'''
+    t[0] = t[1]
+
+# En caso de no cumplir con las reglas
+def p_error(t):
+    print("Error sintáctico en '%s'" % t.value)
+
+# Construyendo el analizador sintáctico
+parser = yacc.yacc()
+
+# Usando YACC
+for linea in instrucciones:
+    print(f'Instrucción: {linea}', end=' ')
+    parser.parse(linea)
