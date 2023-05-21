@@ -1,0 +1,1 @@
+Conocer el proceso de implementación a través de dos elementos tradicionales para la implementación del A. Léxico y Sintáctico, así como su propia implementación por medio de nuevas y actuales herramientas.
